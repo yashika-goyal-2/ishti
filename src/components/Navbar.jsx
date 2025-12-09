@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, User, Search, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import iconImg from '../assets/icon.jpg';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -12,7 +13,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container navbar-container">
         <Link to="/" className="logo">
-          <img src="/icon.jpg" alt="Ishti" className="logo-img" />
+          <img src={iconImg} alt="Ishti" className="logo-img" />
         </Link>
         
         {/* Desktop Navigation */}
