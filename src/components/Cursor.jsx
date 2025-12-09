@@ -2,46 +2,24 @@ import React, { useEffect, useState, useRef } from 'react';
 import './Cursor.css';
 
 const Cursor = () => {
-  const cursorRef = useRef(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  // Mouse position (immediate)
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+  // Ring position (delayed)
+  const [ringPos, setRingPos] = useState({ x: -100, y: -100 });
+  
   const [hidden, setHidden] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [linkHovered, setLinkHovered] = useState(false);
-  const [trails, setTrails] = useState([]);
+  
+  // Use refs for mutable values to avoid re-renders in the animation loop variables
+  const mousePosRef = useRef({ x: -100, y: -100 });
+  const requestRef = useRef();
 
   useEffect(() => {
-    const addEventListeners = () => {
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseenter", onMouseEnter);
-      document.addEventListener("mouseleave", onMouseLeave);
-      document.addEventListener("mousedown", onMouseDown);
-      document.addEventListener("mouseup", onMouseUp);
-    };
-
-    const removeEventListeners = () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseenter", onMouseEnter);
-      document.removeEventListener("mouseleave", onMouseLeave);
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
-
     const onMouseMove = (e) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      
-      // Add trail with refined color flow
-      // Use a slower, smoother hue cycle for a premium feel
-      const time = Date.now() / 20;
-      const hue = (time % 360); 
-      
-      const newTrail = {
-        x: e.clientX,
-        y: e.clientY,
-        id: Date.now(),
-        hue: hue
-      };
-      
-      setTrails(prev => [...prev.slice(-25), newTrail]); // Longer trail for better flow
+      const { clientX, clientY } = e;
+      mousePosRef.current = { x: clientX, y: clientY };
+      setMousePos({ x: clientX, y: clientY });
     };
 
     const onMouseEnter = () => setHidden(false);
@@ -49,55 +27,83 @@ const Cursor = () => {
     const onMouseDown = () => setClicked(true);
     const onMouseUp = () => setClicked(false);
 
-    const handleLinkHoverEvents = () => {
-      document.querySelectorAll("a, button, .clickable, input, textarea").forEach((el) => {
-        el.addEventListener("mouseover", () => setLinkHovered(true));
-        el.addEventListener("mouseout", () => setLinkHovered(false));
-      });
-    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseenter", onMouseEnter);
+    document.addEventListener("mouseleave", onMouseLeave);
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mouseup", onMouseUp);
 
-    addEventListeners();
-    handleLinkHoverEvents();
-
-    // Cleanup trails periodically
-    const interval = setInterval(() => {
-      setTrails(prev => prev.slice(1));
-    }, 40); // Slightly faster cleanup for smooth animation
+    // Link hover detection
+    const handleLinkHover = (isHovering) => setLinkHovered(isHovering);
+    
+    // We'll use event delegation for better performance or just simple checking on move
+    // simpler approach: re-attach listeners to generic interactive elements
+    const interactiveElements = document.querySelectorAll("a, button, .clickable, input, textarea, select");
+    interactiveElements.forEach(el => {
+      el.addEventListener("mouseenter", () => handleLinkHover(true));
+      el.addEventListener("mouseleave", () => handleLinkHover(false));
+    });
 
     return () => {
-      removeEventListeners();
-      clearInterval(interval);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseenter", onMouseEnter);
+      document.removeEventListener("mouseleave", onMouseLeave);
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mouseup", onMouseUp);
+      
+      interactiveElements.forEach(el => {
+        el.removeEventListener("mouseenter", () => handleLinkHover(true));
+        el.removeEventListener("mouseleave", () => handleLinkHover(false));
+      });
+      cancelAnimationFrame(requestRef.current);
     };
   }, []);
 
-  const cursorClasses = `cursor ${hidden ? "cursor--hidden" : ""} ${clicked ? "cursor--clicked" : ""} ${linkHovered ? "cursor--link-hovered" : ""}`;
+  // Animation Loop for the Smooth Ring
+  useEffect(() => {
+    const animateRing = () => {
+      setRingPos(prevRingPos => {
+        // Linear interpolation (Lerp) for smoothness
+        // Formula: current + (target - current) * fraction
+        // Increased speed to 0.35 to keep the ring closer to the dot (prevents "escaping")
+        const dx = mousePosRef.current.x - prevRingPos.x;
+        const dy = mousePosRef.current.y - prevRingPos.y;
+        
+        return {
+          x: prevRingPos.x + dx * 0.35, 
+          y: prevRingPos.y + dy * 0.35
+        };
+      });
+      
+      requestRef.current = requestAnimationFrame(animateRing);
+    };
+    
+    requestRef.current = requestAnimationFrame(animateRing);
+    
+    return () => cancelAnimationFrame(requestRef.current);
+  }, []);
+
+  const cursorClasses = `cursor-wrapper ${hidden ? "cursor--hidden" : ""} ${clicked ? "cursor--clicked" : ""} ${linkHovered ? "cursor--link-hovered" : ""}`;
 
   return (
-    <>
-      {trails.map((trail, index) => (
-        <div 
-          key={trail.id}
-          className="cursor-trail"
-          style={{
-            left: `${trail.x}px`,
-            top: `${trail.y}px`,
-            // Use HSL with high saturation and slightly lighter lightness for "glowing" effect
-            backgroundColor: `hsl(${trail.hue}, 90%, 60%)`, 
-            opacity: (index + 1) / trails.length * 0.5, // Max opacity 0.5 for transparency
-            transform: `translate(-50%, -50%) scale(${(index + 1) / trails.length})`,
-            filter: `blur(${2 + (trails.length - index) * 0.2}px)` // Dynamic blur for "tail" effect
-          }}
-        />
-      ))}
-      <div
-        ref={cursorRef}
-        className={cursorClasses}
+    <div className={cursorClasses}>
+      {/* The trailing ring */}
+      <div 
+        className="cursor-ring"
         style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
+          left: `${ringPos.x}px`,
+          top: `${ringPos.y}px`
+        }} 
+      />
+      {/* The main dot */}
+      <div 
+        className="cursor-dot"
+        style={{
+          left: `${mousePos.x}px`,
+          top: `${mousePos.y}px`
         }}
       />
-    </>
+    </div>
   );
 };
 

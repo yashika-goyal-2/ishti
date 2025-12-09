@@ -1,47 +1,83 @@
-.cursor {
-  width: 30px; /* Increased from 20px */
-  height: 30px; /* Increased from 20px */
-  border: 2px solid var(--color-pink);
-  border-radius: 50%;
+/* Global variables */
+:root {
+  --color-pink: #ff007f;
+  --cursor-size-dot: 8px;
+  --cursor-size-ring: 40px; /* Slightly larger ring */
+}
+
+/* Wrapper to hold states and apply blending */
+.cursor-wrapper {
   position: fixed;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
+  top: 0;
+  left: 0;
   z-index: 9999;
-  transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
-  /* Removed mix-blend-mode to ensure colors are visible on white */
-}
-
-.cursor-trail {
-  width: 28px; /* Slightly larger */
-  height: 28px;
-  border-radius: 50%;
-  position: fixed;
   pointer-events: none;
-  z-index: 9998;
-  transition: opacity 0.1s;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Softer shadow */
-  will-change: transform, opacity; /* Performance optimization */
+  /* CRITICAL: Difference mode makes white turn black on white, and white on black. */
+  mix-blend-mode: difference;
 }
 
-.cursor--hidden {
+/* Main Dot (The "Pointer") */
+.cursor-dot {
+  position: fixed;
+  width: var(--cursor-size-dot);
+  height: var(--cursor-size-dot);
+  background-color: #ffffff; /* White for difference mode */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  pointer-events: none;
+  transition: transform 0.1s ease;
+}
+
+/* Trailing Ring (The "Fluidity") */
+.cursor-ring {
+  position: fixed;
+  width: var(--cursor-size-ring);
+  height: var(--cursor-size-ring);
+  border: 2px solid #ffffff; /* White border for difference mode */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  pointer-events: none;
+  transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  will-change: left, top, width, height, transform;
+}
+
+/* Hidden State */
+.cursor--hidden .cursor-dot,
+.cursor--hidden .cursor-ring {
   opacity: 0;
 }
 
-.cursor--clicked {
+/* Click State */
+.cursor--clicked .cursor-dot {
+  transform: translate(-50%, -50%) scale(0.5);
+}
+.cursor--clicked .cursor-ring {
   transform: translate(-50%, -50%) scale(0.8);
-  background-color: var(--color-pink);
-  box-shadow: 0 0 20px var(--color-pink);
+  background-color: rgba(255, 255, 255, 1); /* Flash full white (inverted logic) */
 }
 
-.cursor--link-hovered {
-  transform: translate(-50%, -50%) scale(2.0); /* Slightly smaller scale than before */
-  background-color: rgba(255, 0, 127, 0.1);
-  border-color: transparent;
-  backdrop-filter: none; /* Removed blur */
+/* Hover State (Interactive Elements) */
+.cursor--link-hovered .cursor-dot {
+  opacity: 0; /* Hide dot inside hover */
 }
 
+.cursor--link-hovered .cursor-ring {
+  width: 60px;
+  height: 60px;
+  background-color: #ffffff; /* Solid white block */
+  border-width: 0;
+  /* Since we are in difference mode: 
+     White block over Black text = Text becomes White (readable).
+     White block over White bg = Block becomes Black. 
+  */
+  opacity: 1;
+}
+
+/* Mobile: Hide custom cursor */
 @media (max-width: 768px) {
-  .cursor, .cursor-trail {
+  .cursor-wrapper {
     display: none;
   }
 }

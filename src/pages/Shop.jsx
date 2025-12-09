@@ -13,12 +13,29 @@ const Shop = () => {
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || 'All');
   const [priceRange, setPriceRange] = useState(5000);
   const [showFilters, setShowFilters] = useState(false);
+  const [expandedSection, setExpandedSection] = useState('men'); // 'men' or 'women' or null
+
+  // Detailed styling structure
+  const shopCategories = {
+    men: {
+      title: "Men's Fashion",
+      items: ["T-Shirts", "Shirts", "Jeans", "Trousers", "Shoes", "Watches"]
+    },
+    women: {
+      title: "Women's Fashion",
+      items: ["Dresses", "Tops", "Kurtas", "Sarees", "Jeans", "Heels", "Handbags"]
+    }
+  };
 
   useEffect(() => {
     let result = products;
 
     if (selectedCategory !== 'All') {
-      result = result.filter(p => p.category.toLowerCase() === selectedCategory.toLowerCase());
+      // Simple prefix match or exact match logic
+      result = result.filter(p => 
+        p.category.toLowerCase().includes(selectedCategory.toLowerCase()) || 
+        selectedCategory.toLowerCase().includes(p.category.toLowerCase())
+      );
     }
 
     result = result.filter(p => p.price <= priceRange);
@@ -32,10 +49,14 @@ const Shop = () => {
     }
   }, [categoryParam]);
 
+  const toggleSection = (section) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
   return (
     <div className="container shop-page">
       <div className="shop-header">
-        <h1>Shop</h1>
+        <h1>Shop Collections</h1>
         <button className="filter-toggle" onClick={() => setShowFilters(!showFilters)}>
           <Filter size={20} /> Filters
         </button>
@@ -44,44 +65,80 @@ const Shop = () => {
       <div className="shop-content">
         {/* Sidebar Filters */}
         <aside className={`shop-sidebar ${showFilters ? 'active' : ''}`}>
-          <div className="filter-group">
-            <h3>Categories</h3>
-            <ul>
-              <li>
+          
+          <div className="sidebar-section">
+             <h3 className="sidebar-title">Categories</h3>
+             
+             {/* All Products Option */}
+             <div className="category-item-all">
                 <button 
                   className={selectedCategory === 'All' ? 'active' : ''} 
                   onClick={() => setSelectedCategory('All')}
                 >
-                  All
+                  View All
                 </button>
-              </li>
-              {categories.map(cat => (
-                <li key={cat.id}>
-                  <button 
-                    className={selectedCategory.toLowerCase() === cat.slug ? 'active' : ''} 
-                    onClick={() => setSelectedCategory(cat.slug)}
-                  >
-                    {cat.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
+             </div>
+
+             {/* Men Section */}
+             <div className="category-group">
+                <button className="category-header" onClick={() => toggleSection('men')}>
+                  <span>Men</span>
+                  <span>{expandedSection === 'men' ? '−' : '+'}</span>
+                </button>
+                
+                <div className={`category-list ${expandedSection === 'men' ? 'expanded' : ''}`}>
+                  {shopCategories.men.items.map(item => (
+                    <button 
+                      key={item}
+                      className={`category-subitem ${selectedCategory === item ? 'active' : ''}`}
+                      onClick={() => setSelectedCategory(item)}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+             </div>
+
+             {/* Women Section */}
+             <div className="category-group">
+                <button className="category-header" onClick={() => toggleSection('women')}>
+                  <span>Women</span>
+                  <span>{expandedSection === 'women' ? '−' : '+'}</span>
+                </button>
+                
+                <div className={`category-list ${expandedSection === 'women' ? 'expanded' : ''}`}>
+                  {shopCategories.women.items.map(item => (
+                    <button 
+                      key={item}
+                      className={`category-subitem ${selectedCategory === item ? 'active' : ''}`}
+                      onClick={() => setSelectedCategory(item)}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+             </div>
           </div>
 
-          <div className="filter-group">
-            <h3>Price Range</h3>
-            <div className="price-slider">
+          <div className="sidebar-section">
+            <h3 className="sidebar-title">Price Range</h3>
+            <div className="price-filter-container">
+              <div className="price-info">
+                 <span className="price-label">Max Price:</span>
+                 <span className="price-value">₹{priceRange}</span>
+              </div>
               <input 
                 type="range" 
                 min="0" 
                 max="5000" 
                 step="100" 
                 value={priceRange} 
+                className="price-slider-range"
                 onChange={(e) => setPriceRange(Number(e.target.value))} 
               />
-              <div className="price-labels">
+              <div className="price-min-max">
                 <span>₹0</span>
-                <span>₹{priceRange}</span>
+                <span>₹5000</span>
               </div>
             </div>
           </div>
@@ -97,7 +154,12 @@ const Shop = () => {
             </div>
           ) : (
             <div className="no-products">
-              <p>No products found matching your criteria.</p>
+              <div className="no-products-content">
+                <p>No products found in this category.</p>
+                <button onClick={() => setSelectedCategory('All')} className="reset-btn">
+                  View All Products
+                </button>
+              </div>
             </div>
           )}
         </main>

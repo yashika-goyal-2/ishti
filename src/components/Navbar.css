@@ -4,7 +4,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  padding: 1rem 0;
+  padding: 0; /* Adjusted padding */
 }
 
 .navbar-container {
@@ -12,6 +12,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
+  padding: 1rem;
 }
 
 .logo {
@@ -48,20 +49,102 @@
   color: var(--color-gray-dark);
 }
 
+/* Nav Links & Dropdowns */
 .nav-links {
   display: flex;
   gap: 2rem;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-item-group {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .nav-links a {
   font-weight: 500;
   transition: color 0.3s;
+  text-decoration: none;
+  color: var(--color-black);
 }
 
-.nav-links a:hover {
+/* Specific styling for header link to ensure it matches others */
+.nav-link-header {
+  padding: 1rem 0;
+  cursor: pointer;
+}
+
+.nav-links a:hover, .nav-link-header:hover {
   color: var(--color-pink);
 }
 
+/* Mega Menu / Dropdown Styling */
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background-color: white;
+  min-width: 600px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  z-index: 1000;
+  /* Arrow indicator */
+}
+
+/* Show Dropdown on Hover */
+.nav-item-group:hover .nav-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+.dropdown-section h4 {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+  color: var(--color-pink);
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.dropdown-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.dropdown-section li {
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-section a {
+  font-size: 0.9rem;
+  color: #555;
+  transition: transform 0.2s, color 0.2s;
+  display: block;
+}
+
+.dropdown-section a:hover {
+  color: var(--color-black);
+  transform: translateX(5px);
+}
+
+/* Icons */
 .nav-icons {
   display: flex;
   align-items: center;
@@ -105,9 +188,33 @@
   object-fit: contain;
 }
 
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+  .nav-dropdown {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    min-width: 100%;
+    padding: 0 1rem;
+    display: none; /* Hide in mobile view initially or handle with js */
+    background: #f9f9f9;
+  }
+  
+  /* For simple mobile stacking (can be improved with JS accordion, but basic stacking for now) */
+  .nav-item-group:hover .nav-dropdown {
+    display: block;
+    position: static;
+  }
+
+  .nav-dropdown-content {
+    grid-template-columns: 1fr; /* Stack vertically */
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .search-bar {
-    display: none; /* Hide search on mobile for now or move it */
+    display: none; 
   }
 
   .menu-btn {
@@ -127,15 +234,28 @@
     transform: translateY(-150%);
     transition: transform 0.3s ease;
     z-index: 999;
+    height: auto;
+    align-items: flex-start;
+  }
+  
+  .nav-item-group {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
   }
 
   .nav-links.active {
     transform: translateY(0);
   }
   
-  .nav-links a {
+  .nav-links a, .nav-link-header {
     display: block;
     padding: 0.5rem 0;
-    text-align: center;
+    width: 100%;
   }
+
+  /* Force display dropdowns on mobile when menu open? 
+     Or keep hover. Hover on mobile is tricky, usually tap.
+  */
 }

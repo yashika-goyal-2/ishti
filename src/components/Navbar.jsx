@@ -7,14 +7,15 @@ import './Navbar.css';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { cartCount } = useCart();
-
+  
   return (
     <nav className="navbar">
       <div className="container navbar-container">
         <Link to="/" className="logo">
           <img src="/icon.jpg" alt="Ishti" className="logo-img" />
         </Link>
-
+        
+        {/* Desktop Navigation */}
         <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link>
           <Link to="/shop" onClick={() => setIsMenuOpen(false)}>Shop</Link>
