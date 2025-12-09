@@ -1,0 +1,50 @@
+.policy-page {
+  padding: 4rem 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--color-black);
+}
+
+.policy-page h1 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.policy-page h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--color-pink);
+}
+
+.policy-page p, .policy-page li {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.policy-page ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.faq-section {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.faq-section h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-answer {
+  margin-top: 0.5rem;
+}

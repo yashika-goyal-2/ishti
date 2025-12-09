@@ -1,0 +1,47 @@
+.cursor {
+  width: 30px; /* Increased from 20px */
+  height: 30px; /* Increased from 20px */
+  border: 2px solid var(--color-pink);
+  border-radius: 50%;
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  transition: width 0.2s, height 0.2s, background-color 0.2s, border-color 0.2s;
+  /* Removed mix-blend-mode to ensure colors are visible on white */
+}
+
+.cursor-trail {
+  width: 28px; /* Slightly larger */
+  height: 28px;
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transition: opacity 0.1s;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Softer shadow */
+  will-change: transform, opacity; /* Performance optimization */
+}
+
+.cursor--hidden {
+  opacity: 0;
+}
+
+.cursor--clicked {
+  transform: translate(-50%, -50%) scale(0.8);
+  background-color: var(--color-pink);
+  box-shadow: 0 0 20px var(--color-pink);
+}
+
+.cursor--link-hovered {
+  transform: translate(-50%, -50%) scale(2.0); /* Slightly smaller scale than before */
+  background-color: rgba(255, 0, 127, 0.1);
+  border-color: transparent;
+  backdrop-filter: none; /* Removed blur */
+}
+
+@media (max-width: 768px) {
+  .cursor, .cursor-trail {
+    display: none;
+  }
+}
