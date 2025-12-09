@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, MapPin, Phone, Mail } from 'lucide-react';
+import logoImg from '../assets/logo.jpg';
 import './Footer.css';
 
 const Footer = () => {
@@ -9,7 +10,7 @@ const Footer = () => {
       <div className="container footer-container">
         <div className="footer-section">
           <div className="footer-logo">
-            <img src="/logo.jpg" alt="Ishti" className="logo-img" style={{maxHeight: '40px'}} />
+            <img src={logoImg} alt="Ishti" className="logo-img" style={{maxHeight: '40px'}} />
           </div>
           <p>Your one-stop destination for the latest fashion trends. Shop the best quality clothes and accessories.</p>
           <div className="social-icons">
